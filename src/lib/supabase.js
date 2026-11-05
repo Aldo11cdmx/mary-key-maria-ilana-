@@ -1,15 +1,26 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Cliente de Supabase configurado solo con variables de entorno.
-// No se guardan credenciales reales en el repositorio.
-// Copia .env.example a .env y completa tus llaves.
+// Cliente de Supabase (equivalente al bloque `utils/supabase.ts` de los
+// ejemplos de Supabase, adaptado a la estructura JS de este proyecto en
+// `src/lib/supabase.js`; el proyecto no se convierte a TypeScript).
+// Solo se leen nombres de variables de entorno. Nunca se guardan
+// credenciales reales en el repositorio (que es público).
+// Copia .env.example a .env y completa tus llaves en local.
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseKey =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  import.meta.env.VITE_SUPABASE_ANON_KEY
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey)
+
+if (!isSupabaseConfigured && typeof console !== 'undefined') {
+  console.warn(
+    '[Supabase] Variables VITE_SUPABASE_URL y VITE_SUPABASE_PUBLISHABLE_KEY no configuradas. La app usa los datos de ejemplo de src/data/mockData.js. Copia .env.example a .env para conectar tu proyecto.'
+  )
+}
 
 export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseKey)
   : null
 
 // Tablas previstas cuando se conecte Supabase:

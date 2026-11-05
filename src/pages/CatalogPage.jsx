@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Sparkles, Tag, X } from 'lucide-react'
 import ProductCard from '../components/ProductCard.jsx'
+import Input from '../components/ui/input.jsx'
+import { fetchProducts } from '../lib/products.js'
 import { CATEGORIES, NEEDS, PRODUCTS, ROUTINES, SKIN_TYPES, routineTotal } from '../data/mockData.js'
 import { formatPrice } from '../lib/whatsapp.js'
 import { useCart } from '../context/CartContext.jsx'
@@ -14,9 +16,25 @@ export default function CatalogPage() {
   const [promoOnly, setPromoOnly] = useState(false)
   const [maxPrice, setMaxPrice] = useState(400)
   const { addItem } = useCart()
+  // Ejemplo de consulta a Supabase: si hay llaves, trae los productos
+  // reales; si no, usa los datos de ejemplo sin romperse.
+  const [products, setProducts] = useState(PRODUCTS)
+  const [dataSource, setDataSource] = useState('mock')
+  useEffect(() => {
+    let alive = true
+    fetchProducts().then(({ source, products: loaded }) => {
+      if (alive) {
+        setProducts(loaded)
+        setDataSource(source)
+      }
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   const filtered = useMemo(() => {
-    return PRODUCTS.filter((p) => {
+    return products.filter((p) => {
       if (query && !`${p.name} ${p.description}`.toLowerCase().includes(query.toLowerCase())) return false
       if (skinType !== 'Todas' && !p.skinTypes.includes(skinType)) return false
       if (need !== 'Todas' && !p.needs.includes(need)) return false
@@ -25,7 +43,7 @@ export default function CatalogPage() {
       if ((p.promoPrice || p.price) > maxPrice) return false
       return true
     })
-  }, [query, skinType, need, category, promoOnly, maxPrice])
+  }, [query, skinType, need, category, promoOnly, maxPrice, products])
 
   const clearFilters = () => {
     setQuery('')
@@ -57,8 +75,8 @@ export default function CatalogPage() {
       <section id="catalogo" className="mt-6">
         <div className="glass rounded-3xl p-4 shadow-glass">
           <div className="relative">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar producto..." className="input pl-11" aria-label="Buscar producto" />
+            <Search size={18} className="absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate-400" />
+            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar producto..." className="pl-11" aria-label="Buscar producto" />
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <select value={skinType} onChange={(e) => setSkinType(e.target.value)} className="chip cursor-pointer" aria-label="Tipo de piel">
@@ -84,7 +102,11 @@ export default function CatalogPage() {
           </div>
         </div>
 
-        <p className="mt-4 text-sm text-slate-500">{filtered.length} producto{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}</p>
+        <p className="mt-4 text-sm text-slate-500">
+          {filtered.length} producto{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}
+          {' · '}
+          {dataSource === 'supabase' ? 'Datos en vivo desde Supabase' : 'Datos de ejemplo (sin Supabase configurado)'}
+        </p>
         {filtered.length === 0 ? (
           <p className="glass mt-4 rounded-3xl p-8 text-center text-sm text-slate-500">No encontramos productos con esos filtros. Prueba limpiar la búsqueda.</p>
         ) : (
