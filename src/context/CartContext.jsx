@@ -12,7 +12,8 @@ export function CartProvider({ children }) {
       if (found) {
         return prev.map((item) =>
           item.id === product.id
-            ? { ...item, quantity: Math.min(item.quantity + quantity, product.stock) }
+            // stock null = aún no registrado: sin tope (Math.min con null daría 0).
+            ? { ...item, quantity: product.stock != null ? Math.min(item.quantity + quantity, product.stock) : item.quantity + quantity }
             : item
         )
       }

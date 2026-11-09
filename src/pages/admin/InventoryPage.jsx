@@ -3,14 +3,16 @@ import { PRODUCTS, SUPPLIER_SUGGESTIONS } from '../../data/mockData.js'
 import { formatPrice } from '../../lib/whatsapp.js'
 
 export default function InventoryPage() {
-  const lowStock = PRODUCTS.filter((p) => p.stock <= 5)
-  const totalUnits = PRODUCTS.reduce((sum, p) => sum + p.stock, 0)
-  const inventoryValue = PRODUCTS.reduce((sum, p) => sum + p.stock * p.cost, 0)
+  // stock null = aún no registrado en el panel: no cuenta como stock bajo.
+  const lowStock = PRODUCTS.filter((p) => p.stock != null && p.stock <= 5)
+  const totalUnits = PRODUCTS.reduce((sum, p) => sum + (p.stock ?? 0), 0)
+  const inventoryValue = PRODUCTS.reduce((sum, p) => sum + (p.stock ?? 0) * (p.cost ?? 0), 0)
+  const hasStock = PRODUCTS.some((p) => p.stock != null)
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-slate-800">Inventario</h1>
-      <p className="text-sm text-slate-500">{totalUnits} unidades en stock · Valor en costo: {formatPrice(inventoryValue)}</p>
+      <p className="text-sm text-slate-500">{hasStock ? `${totalUnits} unidades en stock · Valor en costo: ${formatPrice(inventoryValue)}` : 'Stock por registrar: agrega las unidades y el costo de cada producto para ver el valor del inventario.'}</p>
 
       {lowStock.length > 0 && (
         <section className="mt-5 rounded-3xl bg-red-50 p-4">
@@ -36,19 +38,19 @@ export default function InventoryPage() {
           </thead>
           <tbody>
             {PRODUCTS.map((p) => {
-              const margin = Math.round(((p.price - p.cost) / p.price) * 100)
-              const low = p.stock <= 5
+              const margin = p.cost == null ? null : Math.round(((p.price - p.cost) / p.price) * 100)
+              const low = p.stock != null && p.stock <= 5
               return (
                 <tr key={p.id} className="border-t border-slate-100">
                   <td className="px-4 py-3 font-medium text-slate-700">{p.name}</td>
                   <td className="px-4 py-3">{formatPrice(p.price)}</td>
-                  <td className="px-4 py-3">{formatPrice(p.cost)}</td>
+                  <td className="px-4 py-3">{p.cost == null ? '—' : formatPrice(p.cost)}</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-1 text-xs font-bold ${low ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                      {p.stock} u.
+                    <span className={`rounded-full px-2 py-1 text-xs font-bold ${p.stock == null ? 'bg-slate-100 text-slate-500' : low ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                      {p.stock == null ? 'Por registrar' : `${p.stock} u.`}
                     </span>
                   </td>
-                  <td className="hidden px-4 py-3 sm:table-cell">{margin}%</td>
+                  <td className="hidden px-4 py-3 sm:table-cell">{margin == null ? '—' : `${margin}%`}</td>
                 </tr>
               )
             })}

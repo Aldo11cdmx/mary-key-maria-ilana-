@@ -14,7 +14,8 @@ export default function CatalogPage() {
   const [need, setNeed] = useState('Todas')
   const [category, setCategory] = useState('Todas')
   const [promoOnly, setPromoOnly] = useState(false)
-  const [maxPrice, setMaxPrice] = useState(400)
+  // El producto más caro del catálogo THE LOOK Nov–Dic 2026 cuesta $2,049.
+  const [maxPrice, setMaxPrice] = useState(2100)
   const { addItem } = useCart()
   // Ejemplo de consulta a Supabase: si hay llaves, trae los productos
   // reales; si no, usa los datos de ejemplo sin romperse.
@@ -51,7 +52,7 @@ export default function CatalogPage() {
     setNeed('Todas')
     setCategory('Todas')
     setPromoOnly(false)
-    setMaxPrice(400)
+    setMaxPrice(2100)
   }
 
   return (
@@ -96,7 +97,7 @@ export default function CatalogPage() {
             </button>
             <label className="chip cursor-pointer">
               Hasta {formatPrice(maxPrice)}
-              <input type="range" min="150" max="400" step="10" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} className="w-24 accent-rose-600" aria-label="Precio máximo" />
+              <input type="range" min="150" max="2100" step="10" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} className="w-24 accent-rose-600" aria-label="Precio máximo" />
             </label>
             <button onClick={clearFilters} className="chip"><X size={12} /> Limpiar</button>
           </div>
@@ -105,7 +106,7 @@ export default function CatalogPage() {
         <p className="mt-4 text-sm text-slate-500">
           {filtered.length} producto{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}
           {' · '}
-          {dataSource === 'supabase' ? 'Datos en vivo desde Supabase' : 'Datos de ejemplo (sin Supabase configurado)'}
+          {dataSource === 'supabase' ? 'Datos en vivo desde Supabase' : 'Catálogo THE LOOK Nov–Dic 2026 · datos locales'}
         </p>
         {filtered.length === 0 ? (
           <p className="glass mt-4 rounded-3xl p-8 text-center text-sm text-slate-500">No encontramos productos con esos filtros. Prueba limpiar la búsqueda.</p>

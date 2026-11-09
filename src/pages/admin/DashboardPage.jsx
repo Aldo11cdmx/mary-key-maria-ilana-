@@ -44,7 +44,7 @@ export default function DashboardPage() {
             })}
           </ul>
           <p className="mt-4 rounded-2xl bg-amber-50 px-3 py-2 text-xs text-amber-700">
-            Sugerencia: el Protector Solar FPS 50 tiene solo 4 en stock y es de los más vendidos. Conviene pedirlo al proveedor.
+            Sugerencia: el catálogo THE LOOK Nov–Dic 2026 ya está cargado. Registra el stock en Inventario para activar las alertas de reabastecimiento.
           </p>
         </section>
       </div>

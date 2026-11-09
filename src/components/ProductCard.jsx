@@ -1,4 +1,4 @@
-import { Plus, Star, Tag } from 'lucide-react'
+import { Palette, Plus, Sparkles, Star, Tag } from 'lucide-react'
 import { useCart } from '../context/CartContext.jsx'
 import { formatPrice } from '../lib/whatsapp.js'
 
@@ -14,7 +14,8 @@ const GRADIENTS = [
 export default function ProductCard({ product, index = 0 }) {
   const { addItem } = useCart()
   const price = product.promoPrice || product.price
-  const lowStock = product.stock <= 5
+  // stock null = aún no registrado en el panel (no es stock bajo).
+  const lowStock = product.stock != null && product.stock <= 5
   const gradient = GRADIENTS[index % GRADIENTS.length]
   return (
     <article className="glass flex flex-col overflow-hidden rounded-3xl shadow-glass">
@@ -25,18 +26,30 @@ export default function ProductCard({ product, index = 0 }) {
             <Tag size={12} /> Promo
           </span>
         )}
-        <span className={`absolute right-3 top-3 rounded-full px-2 py-1 text-xs font-semibold ${lowStock ? 'bg-red-100 text-red-700' : 'bg-white/90 text-slate-600'}`}>
-          {lowStock ? `Quedan ${product.stock}` : `Stock: ${product.stock}`}
+        <span className={`absolute right-3 top-3 rounded-full px-2 py-1 text-xs font-semibold ${product.stock == null ? 'bg-white/90 text-slate-600' : lowStock ? 'bg-red-100 text-red-700' : 'bg-white/90 text-slate-600'}`}>
+          {product.stock == null ? 'Disponible' : lowStock ? `Quedan ${product.stock}` : `Stock: ${product.stock}`}
         </span>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-sm font-bold leading-snug text-slate-800">{product.name}</h3>
-          <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-600">
-            <Star size={12} fill="currentColor" /> {product.rating}
-          </span>
+          {product.rating != null && (
+            <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-600">
+              <Star size={12} fill="currentColor" /> {product.rating}
+            </span>
+          )}
         </div>
         <p className="text-xs leading-relaxed text-slate-500">{product.description}</p>
+        {product.edition && (
+          <p className="inline-flex items-center gap-1 text-xs font-semibold text-brand-700">
+            <Sparkles size={12} /> Edición {product.edition}{product.validUntil ? ' · vigente hasta 31 dic 2026' : ''}
+          </p>
+        )}
+        {product.shades?.length > 1 && (
+          <p className="inline-flex items-center gap-1 text-xs text-slate-400">
+            <Palette size={12} /> {product.shades.length} tonos disponibles
+          </p>
+        )}
         <p className="text-xs text-slate-400">Para piel: {product.skinTypes.join(', ')}</p>
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
           <div>
